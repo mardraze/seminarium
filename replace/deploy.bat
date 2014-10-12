@@ -1,1 +1,0 @@
-call grunt %1 

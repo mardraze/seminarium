@@ -3,26 +3,29 @@ angular.module('Gen.controllers', [])
 
 
 .controller('ArriveCtrl', function($scope) {
-  $scope.busstops = [
-    {
-      title: 'Traugutta-Sobieskiego',
-      vehicles : [
-        {
-          'name' : '199',
-          'time' : 'za 1 minutę'
-        }
-      ]
-    },
-    {
-      title: 'Miszewskiego',
-      vehicles : [
-        {
-          'name' : '11',
-          'time' : 'za 9 minut'
-        }
-      ]
-    }
-  ];
+  setTimeout(function(){
+    $scope.busstops = [
+      {
+        title: 'Traugutta-Sobieskiego',
+        vehicles : [
+          {
+            'name' : '199',
+            'time' : 'za 1 minutę'
+          }
+        ]
+      },
+      {
+        title: 'Miszewskiego',
+        vehicles : [
+          {
+            'name' : '11',
+            'time' : 'za 9 minut'
+          }
+        ]
+      }
+    ];
+    $scope.asyncDone = true;
+  }, 1);
 })
 
 .controller('MapCtrl', function() {

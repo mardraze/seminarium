@@ -1,23 +1,45 @@
 'use strict';
-angular.module('Gen.services', ['pouchdb'])
 
-//MODEL
-.factory('testdb', function(pouchdb) {
-  return pouchdb.create('test');
+angular.module('Seminarium.services', [])
+
+.factory('db', function() {
+  PouchDB.destroy('testdb');
+  var p = new PouchDB('testdb');
+  return p;
 })
-.factory('PetService', function(testdb) {
+.factory('SearchService', function(db) {
 
   var pets = {};
   return {
+    test : function(){
+      
+      var doc = {_id: 'mydoc', title: 'Guess who?', text: 'It\'s-a me, Mario!'};
+      db.put(doc).then(function () {
+        console.log('okok');
+        var ret = db.search({
+          query: 'mario',
+          fields: ['title', 'text'],
+          include_docs: true,
+          highlighting: true
+        });
+        console.log('okok2', ret);
+        return ret;
+      }).then(function (res) {
+        console.log(res.rows[0].doc.text); // "It's-a me, Mario!"
+        console.log(res.rows[0].highlighting); // {"text": "It's-a me, <strong>Mario</strong>!"}
+      }).catch(function(e){
+        console.log('error', e);
+      });;
+    },
     all: function(onDone) {
       
-      testdb.allDocs().then(function(allDocs){
+      db.allDocs().then(function(allDocs){
         var data = allDocs.rows;
         var objCache = {};
         var getNextRow = function(it){
           if(it < allDocs.rows.length){
             var id = data[it].id;
-            testdb.get(id).then(function(row){
+            db.get(id).then(function(row){
               objCache[id] = row;
               getNextRow(it+1);
             });
@@ -39,7 +61,7 @@ angular.module('Gen.services', ['pouchdb'])
       return pets;
     },
     get: function(petId, onDone) {
-        testdb.get(petId).then(function(data){
+        db.get(petId).then(function(data){
           pets[petId] = data;
           if(onDone){
             onDone(pets[petId]);
@@ -51,11 +73,11 @@ angular.module('Gen.services', ['pouchdb'])
         return pets[petId];
       },
     remove: function(petId, onDone) {
-      testdb.remove(petId, onDone);
+      db.remove(petId, onDone);
     },
     put: function(id, title, description) {
       var save = function(id) {
-        testdb.put({_id: id+'', title: title, description:description}).then(function(response) {
+        db.put({_id: id+'', title: title, description:description}).then(function(response) {
           // Do something with the response
           console.log('put: function', response);
         });
@@ -63,15 +85,15 @@ angular.module('Gen.services', ['pouchdb'])
       if(id){
         save(id);
       }else{
-        testdb.info().then(function(info){
-          /*jshint camelcase: false */
-          id = info.update_seq;
-          save(id);
-        });
+        //db.info().then(function(info){
+          //id = info.update_seq;
+          //save(id);
+        //});
       }
     }
     
   };
+
 })
 .factory('ToolsService', function() {
   return {
@@ -139,4 +161,5 @@ angular.module('Gen.services', ['pouchdb'])
     }
   };
 })
+
 ;

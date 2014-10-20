@@ -17,15 +17,16 @@
     <!-- endbuild -->
   </head>
 
-  <body ng-app="Gen" animation="slide-left-right-ios7">
+  <body ng-app="Seminarium" animation="slide-left-right-ios7">
 
     <!--
       The nav bar that will be updated as we navigate between views
       Additional attributes set its look, ion-nav-bar animation and icons
       Icons provided by Ionicons: http://ionicons.com/
     -->
-    <ion-nav-bar class="bar-positive">
-      <ion-nav-back-button class="button-icon button-clear ion-ios7-arrow-back">
+    <ion-nav-bar class="bar-stable nav-title-slide-ios7">
+      <ion-nav-back-button class="button-icon icon  ion-ios7-arrow-back">
+        Back
       </ion-nav-back-button>
     </ion-nav-bar>
 
@@ -45,22 +46,35 @@
     <script src="bower_components/angular-animate/angular-animate.min.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
-
     <script src="bower_components/collide/collide.js"></script>
     <script src="bower_components/ionic/release/js/ionic.min.js"></script>
     <script src="bower_components/ionic/release/js/ionic-angular.min.js"></script>
-    <script src="bower_components/pouchdb/dist/pouchdb.min.js"></script>
+    <script src="bower_components/pouchdb/dist/pouchdb.js"></script>
+    <script src="bower_components/pouchdb-quick-search/dist/pouchdb.quick-search.js"></script>
+    <script src="bower_components/requirejs/require.js"></script>
+    <script>
+          require.config({
+            baseUrl: "./",
+            paths: {
+                "pouchdb": "bower_components/pouchdb/dist/pouchdb.js",
+                "pouchdb-quick-search": "bower_components/pouchdb-quick-search/dist/pouchdb.quick-search.js"
+            }
+          });
+    </script>
     <!-- endbuild -->
     
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
-
-    <!-- build:js scripts/scripts.js -->
-    <script src="scripts/config.js"></script>
-    <script src="scripts/controllers.js"></script>
     <script src="scripts/app.js"></script>
+    <script src="scripts/controllers.js"></script>
     <script src="scripts/services.js"></script>
-    <!-- endbuild -->
+
+    <!-- build:js scripts/scripts.js >
+    <script src="scripts/config.js"></script>
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers.js"></script>
+    <script src="scripts/services.js"></script>
+    < endbuild -->
 
 </body>
 </html>

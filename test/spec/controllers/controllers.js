@@ -24,7 +24,7 @@ describe('Controller: ArriveCtrl', function () {
   it('should have title and vehicles property', function () {
     async(function() {
       for(var i=0; i<scope.busstops.length; i++){
-        expect(scope.busstops[i].hasOwnProperty('title')).toBe(true);
+        expect(scope.busstops[i].hasOwnProperty('name')).toBe(true);
         expect(scope.busstops[i].hasOwnProperty('vehicles')).toBe(true);
       }
     });
@@ -67,7 +67,7 @@ describe('Controller: FavoritesCtrl', function () {
   it('should have group and elements properties', function () {
     async(function() {
       for(var i=0; i<scope.favorites.length; i++){
-        expect(scope.favorites[i].hasOwnProperty('group')).toBe(true);
+        expect(scope.favorites[i].hasOwnProperty('name')).toBe(true);
         expect(scope.favorites[i].hasOwnProperty('elements')).toBe(true);
       }
     });
@@ -107,11 +107,11 @@ describe('Controller: DataCtrl', function () {
     });
   }));
 
-  it('should have id and label properties', function () {
+  it('should have id and name properties', function () {
     async(function() {
       for(var i=0; i<scope.list.length; i++){
         expect(scope.list[i].hasOwnProperty('id')).toBe(true);
-        expect(scope.list[i].hasOwnProperty('label')).toBe(true);
+        expect(scope.list[i].hasOwnProperty('name')).toBe(true);
         expect(scope.list[i].hasOwnProperty('description')).toBe(true);
         expect(scope.list[i].hasOwnProperty('updatedAt')).toBe(true);
       }
@@ -119,6 +119,40 @@ describe('Controller: DataCtrl', function () {
   });
 
 });
+
+describe('Controller: DataDetailsCtrl', function () {
+
+  beforeEach(module('Seminarium.controllers'));
+  var async = function(onAsyncDone){
+    waitsFor(function() {
+      return scope.asyncDone;
+    }, "Async timeout", 1000);
+    runs(onAsyncDone);
+  };
+  
+  var DataDetailsCtrl, scope;
+
+  beforeEach(inject(function ($controller, $rootScope) {
+    scope = $rootScope.$new();
+    scope.asyncDone = false;
+    DataDetailsCtrl = $controller('DataDetailsCtrl', {
+      $scope: scope
+    });
+  }));
+
+  it('should have id and name properties', function () {
+    async(function() {
+      expect(scope.data.hasOwnProperty('id')).toBe(true);
+      expect(scope.data.hasOwnProperty('name')).toBe(true);
+      expect(scope.data.hasOwnProperty('description')).toBe(true);
+      expect(scope.data.hasOwnProperty('updatedAt')).toBe(true);
+    });
+  });
+
+});
+
+
+
 
 describe('Controller: MapCtrl', function () {
 

@@ -1,5 +1,19 @@
 <ion-view title="Ulubione">
-  <ion-content>
-    favorites.html
+  <ion-content padding="true">
+    <div  ng-repeat="group in favorites">
+      <div class="row">
+        <div class="col"><h2 class="busstop">{{ group.name }}</h2></div>
+      </div>
+      <div class="row" ng-repeat="element in group.elements">
+        <div class="col">{{ element.name }}</div>
+        <div class="col">
+          <button ng-if="$index == 0" class="button button-small button-light"> </button>
+          <button ng-if="$index > 0" class="button button-small button-balanced">+</button>
+          <button ng-if="$index != group.elements.length-1" class="button button-small button-positive">-</button>
+          <button ng-if="$index == group.elements.length-1" class="button button-small button-light"> </button>
+          <button class="button button-small button-assertive">X</button>
+        </div>
+      </div>
+    </div>
   </ion-content>
 </ion-view>

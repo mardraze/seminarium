@@ -40,6 +40,7 @@ angular.module('Seminarium', ['ionic', 'Seminarium.controllers'])
         }
       }
     })
+  
     .state('tab.arrive', {
       url: '/arrive',
       views: {
@@ -87,7 +88,15 @@ angular.module('Seminarium', ['ionic', 'Seminarium.controllers'])
         }
       }
     })
-
+    .state('tab.data_id', {
+      url: '/data/:id',
+      views: {
+        'data-tab': {
+          templateUrl: 'templates/dataDetails.html',
+          controller: 'DataDetailsCtrl'
+        }
+      }
+    })
     .state('tab.about', {
       url: '/about',
       views: {

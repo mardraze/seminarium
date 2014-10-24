@@ -3,7 +3,7 @@
 angular.module('Seminarium.services', [])
 
 .factory('db', function() {
-  PouchDB.destroy('testdb');
+  //PouchDB.destroy('testdb');
   var p = new PouchDB('testdb');
   return p;
 })
@@ -11,30 +11,23 @@ angular.module('Seminarium.services', [])
 
   var pets = {};
   return {
-    test : function(){
-      
-      var doc = {_id: 'mydoc', title: 'Guess who?', text: 'It\'s-a me, Mario!'};
-      db.put(doc).then(function () {
-        console.log('okok');
-        var ret = db.search({
-          query: 'mario',
-          fields: ['title', 'text'],
-          include_docs: true,
-          highlighting: true
-        });
-        console.log('okok2', ret);
-        return ret;
-      }).then(function (res) {
-        console.log(res.rows[0].doc.text); // "It's-a me, Mario!"
-        console.log(res.rows[0].highlighting); // {"text": "It's-a me, <strong>Mario</strong>!"}
-      }).catch(function(e){
-        console.log('error', e);
-      });;
+    test : function(done){
+      var ret = db.search({
+        query: 'mario',
+        fields: ['title', 'text'],
+        include_docs: true,
+        highlighting: true
+      }).then(done).catch(function(e){
+        console.log(e);
+      });
+      console.log(ret);
+      return ret;
     },
     all: function(onDone) {
       
-      db.allDocs().then(function(allDocs){
-        var data = allDocs.rows;
+      db.allDocs().then(
+          function(allDocs){
+            var data = allDocs.rows;
         var objCache = {};
         var getNextRow = function(it){
           if(it < allDocs.rows.length){

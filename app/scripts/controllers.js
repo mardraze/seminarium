@@ -6,7 +6,7 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
   setTimeout(function(){
     $scope.busstops = [
       {
-        title: 'Traugutta-Sobieskiego',
+        name: 'Traugutta-Sobieskiego',
         vehicles : [
           {
             'name' : '199',
@@ -15,7 +15,7 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
         ]
       },
       {
-        title: 'Miszewskiego',
+        name: 'Miszewskiego',
         vehicles : [
           {
             'name' : '11',
@@ -87,6 +87,13 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
 
 .controller('SearchCtrl', function($scope) {
   $scope.run = true;
+  var data = {
+    'search' : 'asd',
+    'result' : [
+      'asdasd'
+    ]
+  };
+  $scope.data = data;
   $scope.onKeyUp = function(value){
     if(value){
       try{
@@ -102,7 +109,7 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
   setTimeout(function(){
     $scope.favorites = [
       {
-        group : 'Przystanki',
+        name : 'Przystanki',
         elements : [
           {
             'name' : 'Traugutta-Sobieskiego',
@@ -116,7 +123,7 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
         ]
       },
       {
-        group : 'Pojazdy',
+        name : 'Pojazdy',
         elements : [
           {
             'name' : 'Autobus 199',
@@ -138,17 +145,33 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
     $scope.list = [
       {
         id: 1,
-        label : 'Rozkład ZTM Gdańsk',
+        name : 'Rozkład ZTM Gdańsk',
         description: 'Zawiera pozycje przystanków, numery tramwajów i autobusów ZTM Gdańsk',
         updatedAt: '2014.01.14'
       },
       {
         id: 2,
-        label : 'PKP na trasie Gdańsk-Olsztyn',
+        name : 'PKP na trasie Gdańsk-Olsztyn',
         description: 'Zawiera pozycje przystanków oraz pociągi na trasie Gdańsk-Olsztyn',
         updatedAt: '2014.05.07'
       },
     ];
+    $scope.details = function(id){
+      window.location.hash="#/tab/data/"+id;
+    };
+    $scope.asyncDone = true;
+  }, 1);
+})
+      
+
+.controller('DataDetailsCtrl', function($scope) {
+  setTimeout(function(){
+    $scope.data = {
+      id: 1,
+      name : 'Rozkład ZTM Gdańsk',
+      description: 'Zawiera pozycje przystanków, numery tramwajów i autobusów ZTM Gdańsk',
+      updatedAt: '2014.01.14'
+    };
     $scope.asyncDone = true;
   }, 1);
 })

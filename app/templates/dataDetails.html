@@ -1,0 +1,31 @@
+<ion-view title="Dane">
+  <ion-content padding="true">
+    <div class="row">
+      <div class="col"><h2>{{ data.label }}</h2></div>
+    </div>
+    <div class="row">
+      <div class="col">Nazwa</div>
+      <div class="col">{{ data.name }}</div>
+    </div>
+    <div class="row">
+      <div class="col">Opis</div>
+      <div class="col">{{ data.description }}</div>
+    </div>    
+    <div class="row">
+      <div class="col">Data aktualizacji</div>
+      <div class="col">{{ data.updatedAt }}</div>
+    </div>    
+    <div class="row">
+      <div class="col">
+        <button class="button button-full button-balanced">
+          Aktualizuj
+        </button>
+      </div>
+      <div class="col">
+        <button class="button button-full button-energized">
+          Usuń
+        </button>
+      </div>
+    </div>    
+  </ion-content>
+</ion-view>

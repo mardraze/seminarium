@@ -15,7 +15,7 @@ angular.module('Seminarium.services', [])
       var ret = db.search({
         query: 'mario',
         fields: ['title', 'text'],
-        include_docs: true,
+        include_docs: true, // jshint ignore:line
         highlighting: true
       }).then(done).catch(function(e){
         console.log(e);
@@ -26,24 +26,23 @@ angular.module('Seminarium.services', [])
     all: function(onDone) {
       
       db.allDocs().then(
-          function(allDocs){
-            var data = allDocs.rows;
-        var objCache = {};
-        var getNextRow = function(it){
-          if(it < allDocs.rows.length){
-            var id = data[it].id;
-            db.get(id).then(function(row){
-              objCache[id] = row;
-              getNextRow(it+1);
-            });
-          }else{
-
-            pets = objCache;
-            if(onDone){
-              onDone(pets);
+        function(allDocs){
+          var data = allDocs.rows;
+          var objCache = {};
+          var getNextRow = function(it){
+            if(it < allDocs.rows.length){
+              var id = data[it].id;
+              db.get(id).then(function(row){
+                objCache[id] = row;
+                getNextRow(it+1);
+              });
+            }else{
+              pets = objCache;
+              if(onDone){
+                onDone(pets);
+              }
             }
-          }
-        };
+          };
         getNextRow(0);
       });
       

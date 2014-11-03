@@ -157,7 +157,7 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
       },
     ];
     $scope.details = function(id){
-      window.location.hash="#/tab/data/"+id;
+      window.location.hash='#/tab/data/'+id;
     };
     $scope.asyncDone = true;
   }, 1);

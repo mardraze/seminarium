@@ -25,31 +25,29 @@ angular.module('Seminarium.services', [])
     },
     all: function(onDone) {
       
-      db.allDocs().then(
-        function(allDocs){
-          var data = allDocs.rows;
-          var objCache = {};
-          var getNextRow = function(it){
-            if(it < allDocs.rows.length){
-              var id = data[it].id;
-              db.get(id).then(function(row){
-                objCache[id] = row;
-                getNextRow(it+1);
-              });
-            }else{
-              pets = objCache;
-              if(onDone){
-                onDone(pets);
-              }
+      db.allDocs().then(function(allDocs){
+        var data = allDocs.rows;
+        var objCache = {};
+        var getNextRow = function(it){
+          if(it < allDocs.rows.length){
+            var id = data[it].id;
+            db.get(id).then(function(row){
+              objCache[id] = row;
+              getNextRow(it+1);
+            });
+          }else{
+            pets = objCache;
+            if(onDone){
+              onDone(pets);
             }
-          };
+          }
+        };
         getNextRow(0);
       });
-      
+
       if(onDone){
         onDone(pets);
       }
-
       return pets;
     },
     get: function(petId, onDone) {

@@ -4,7 +4,7 @@ angular.module('Seminarium.services', [])
 
 .factory('db', function() {
   //PouchDB.destroy('testdb');
-  var p = new PouchDB('testdb');
+  var p = new PouchDB('testdb');// jshint ignore:line
   return p;
 })
 .factory('SearchService', function(db) {

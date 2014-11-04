@@ -53,13 +53,14 @@
     <script src="bower_components/pouchdb/dist/pouchdb.js"></script>
     <script src="bower_components/pouchdb-quick-search/dist/pouchdb.quick-search.js"></script>
     <script src="bower_components/leaflet/dist/leaflet.js"></script>
-    <script src="bower_components/requirejs/require.js"></script>
+<script src="bower_components/requirejs/require.js"></script>
     <script>
           require.config({
             baseUrl: "./",
             paths: {
-                "pouchdb": "bower_components/pouchdb/dist/pouchdb.js",
-                "pouchdb-quick-search": "bower_components/pouchdb-quick-search/dist/pouchdb.quick-search.js"
+              "leaflet": "bower_components/leaflet/dist/leaflet.js",  
+              "pouchdb": "bower_components/pouchdb/dist/pouchdb.js",
+              "pouchdb-quick-search": "bower_components/pouchdb-quick-search/dist/pouchdb.quick-search.js"
             }
           });
     </script>
@@ -67,16 +68,13 @@
     
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
-    <script src="scripts/app.js"></script>
-    <script src="scripts/controllers.js"></script>
-    <script src="scripts/services.js"></script>
 
-    <!-- build:js scripts/scripts.js >
+    <!-- build:js scripts/scripts.js -->
     <script src="scripts/config.js"></script>
     <script src="scripts/app.js"></script>
     <script src="scripts/controllers.js"></script>
     <script src="scripts/services.js"></script>
-    < endbuild -->
+    <!-- endbuild -->
 
 </body>
 </html>

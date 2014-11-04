@@ -1,28 +1,18 @@
+/*global PouchDB */
 'use strict';
 
 angular.module('Seminarium.services', [])
 
 .factory('db', function() {
   //PouchDB.destroy('testdb');
-  var p = new PouchDB('testdb');// jshint ignore:line
+  var p = new PouchDB('testdb'); // jshint ignore:line
   return p;
 })
 .factory('SearchService', function(db) {
 
   var pets = {};
   return {
-    test : function(done){
-      var ret = db.search({
-        query: 'mario',
-        fields: ['title', 'text'],
-        include_docs: true, // jshint ignore:line
-        highlighting: true
-      }).then(done).catch(function(e){
-        console.log(e);
-      });
-      console.log(ret);
-      return ret;
-    },
+    test: function(){},
     all: function(onDone) {
       
       db.allDocs().then(function(allDocs){

@@ -1,9 +1,10 @@
+/* global L */
 'use strict';
 angular.module('Seminarium.controllers', ['Seminarium.services'])
 
 .controller('ArriveCtrl', function($scope, SearchService) {
-  SearchService.test();
   setTimeout(function(){
+    SearchService.test();
     $scope.busstops = [
       {
         name: 'Traugutta-Sobieskiego',
@@ -32,10 +33,10 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
 .controller('MapCtrl', function($scope) {
   setTimeout(function(){
     $scope.userPosition = {
-      lat : 54,
-      lng : 14
+      lat : 54.372,
+      lng : 18.616
     };
-    $scope.zoom = 8;
+    $scope.zoom = 15;
     $scope.list = [
       {
         id: 1,
@@ -80,16 +81,19 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
         ]
       },
     ];
-
+    L.marker($scope.userPosition).addTo(map)
+      .bindPopup('Moja pozycja')
+      .openPopup();
     $scope.asyncDone = true;
   }, 1);
-  var map = L.map('map').setView([54.35, 18.69], 12);
+  var map = L.map('map').setView([54.370, 18.616], 15);
 
-  L.tileLayer( 'images/seminarium_atlas/MapQuest/{z}/{x}/{y}.jpg', 
-    {
-      maxZoom: 15
-    })
+  L.tileLayer( 'images/seminarium_atlas/MapQuest/{z}/{x}/{y}.jpg', {
+    maxZoom: 15,
+    minZoom: 9
+  })
   .addTo(map);
+
 })
 
 .controller('SearchCtrl', function($scope) {

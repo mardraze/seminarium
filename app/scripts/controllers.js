@@ -83,6 +83,13 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
 
     $scope.asyncDone = true;
   }, 1);
+  var map = L.map('map').setView([54.35, 18.69], 12);
+
+  L.tileLayer( 'images/seminarium_atlas/MapQuest/{z}/{x}/{y}.jpg', 
+    {
+      maxZoom: 15
+    })
+  .addTo(map);
 })
 
 .controller('SearchCtrl', function($scope) {

@@ -7,9 +7,17 @@
   </head>
   <body>
     <script src="bower_components/leaflet/dist/leaflet.js"></script>
-	
+    <div id="map" style="width: 1000px; height: 1000px"></div>
+    
 	<script type="text/javascript">
-      
+      var map = L.map('map').setView([54.35, 18.69], 12);
+
+      L.tileLayer(
+        'images/seminarium_atlas/MapQuest/{z}/{x}/{y}.jpg', 
+        {
+          maxZoom: 15
+        })
+      .addTo(map);
     </script>
   </body>
 </html>

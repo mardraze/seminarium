@@ -1,0 +1,223 @@
+﻿$axure.loadCurrentPage({
+  "url":"szukaj.html",
+  "generationDate":new Date(1415188131632.14),
+  "isCanvasEnabled":false,
+  "variables":["OnLoadVariable"],
+  "page":{
+    "packageId":"8a2ec7ea6d984b9ba8d38cb21f977144",
+    "type":"Axure:Page",
+    "name":"szukaj",
+    "notes":{
+},
+    "style":{
+      "baseStyle":"627587b6038d43cca051c114ac41ad32",
+      "pageAlignment":"near",
+      "fill":{
+        "fillType":"solid",
+        "color":0xFFFFFFFF},
+      "image":null,
+      "imageHorizontalAlignment":"near",
+      "imageVerticalAlignment":"near",
+      "imageRepeat":"auto",
+      "favicon":null,
+      "sketchFactor":"0",
+      "colorStyle":"appliedColor",
+      "fontName":"Applied Font",
+      "borderWidth":"0"},
+    "adaptiveStyles":{
+},
+    "interactionMap":{
+},
+    "diagram":{
+      "objects":[{
+          "id":"a5b48091858d4e02bfba5ed5af4e5bbe",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"buttonShape",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":520,
+              "y":140},
+            "size":{
+              "width":300,
+              "height":370}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"bd837cfbf7c24a7ab992b791c5544c3a",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "location":{
+                  "x":520,
+                  "y":140},
+                "size":{
+                  "width":300,
+                  "height":370}},
+              "adaptiveStyles":{
+}}],
+          "images":{
+            "normal~":"images/home/u0.png"}},
+{
+          "id":"f1ffe3b6382a4e7fb7fdb6565fc73dcb",
+          "label":"",
+          "type":"button",
+          "styleType":"button",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":520,
+              "y":140},
+            "size":{
+              "width":100,
+              "height":75}},
+          "adaptiveStyles":{
+},
+          "interactionMap":{
+            "onClick":{
+              "description":"OnClick",
+              "cases":[{
+                  "description":"Case 1",
+                  "isNewIfGroup":false,
+                  "actions":[{
+                      "action":"linkWindow",
+                      "description":"Open menu_rozwiniete in Current Window",
+                      "target":{
+                        "targetType":"page",
+                        "url":"menu_rozwiniete.html",
+                        "includeVariables":true},
+                      "linkType":"current"}]}]}},
+          "tabbable":true},
+{
+          "id":"048fe170794e48a49863cf00ae9c1271",
+          "label":"",
+          "type":"textBox",
+          "styleType":"textBox",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":530,
+              "y":244},
+            "size":{
+              "width":220,
+              "height":25}},
+          "adaptiveStyles":{
+},
+          "placeholderText":"Szukaj przystanku"},
+{
+          "id":"c860853cbbc746ed939581cf6a926b22",
+          "label":"",
+          "type":"button",
+          "styleType":"button",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":760,
+              "y":245},
+            "size":{
+              "width":50,
+              "height":25}},
+          "adaptiveStyles":{
+},
+          "interactionMap":{
+            "onClick":{
+              "description":"OnClick",
+              "cases":[{
+                  "description":"Case 1",
+                  "isNewIfGroup":false,
+                  "actions":[{
+                      "action":"linkWindow",
+                      "description":"Open znaleziono pojazd in Current Window",
+                      "target":{
+                        "targetType":"page",
+                        "url":"znaleziono_pojazd.html",
+                        "includeVariables":true},
+                      "linkType":"current"}]}]}},
+          "tabbable":true},
+{
+          "id":"8fbfd7db41514d8cbb1ecb7dbd7457c3",
+          "label":"",
+          "type":"radioButton",
+          "styleType":"radioButton",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":550,
+              "y":304},
+            "size":{
+              "width":170,
+              "height":16}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"cca2c63f6235483baa0b8fe5739fcedd",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "location":{
+                  "x":550,
+                  "y":304},
+                "size":{
+                  "width":170,
+                  "height":16}},
+              "adaptiveStyles":{
+}}]},
+{
+          "id":"103a604c0dc74e1a80338e3df366fd29",
+          "label":"",
+          "type":"radioButton",
+          "styleType":"radioButton",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":550,
+              "y":340},
+            "size":{
+              "width":130,
+              "height":16}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"e77df53743cd4f19b55641bfda5b5e5a",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "location":{
+                  "x":550,
+                  "y":340},
+                "size":{
+                  "width":130,
+                  "height":16}},
+              "adaptiveStyles":{
+}}]}]}},
+  "masters":{
+},
+  "objectPaths":{
+    "a5b48091858d4e02bfba5ed5af4e5bbe":{
+      "scriptId":"u0"},
+    "bd837cfbf7c24a7ab992b791c5544c3a":{
+      "scriptId":"u1"},
+    "f1ffe3b6382a4e7fb7fdb6565fc73dcb":{
+      "scriptId":"u2"},
+    "048fe170794e48a49863cf00ae9c1271":{
+      "scriptId":"u3"},
+    "c860853cbbc746ed939581cf6a926b22":{
+      "scriptId":"u4"},
+    "8fbfd7db41514d8cbb1ecb7dbd7457c3":{
+      "scriptId":"u5"},
+    "cca2c63f6235483baa0b8fe5739fcedd":{
+      "scriptId":"u6"},
+    "103a604c0dc74e1a80338e3df366fd29":{
+      "scriptId":"u7"},
+    "e77df53743cd4f19b55641bfda5b5e5a":{
+      "scriptId":"u8"}}});

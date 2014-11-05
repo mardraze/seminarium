@@ -1,0 +1,212 @@
+﻿$axure.loadCurrentPage({
+  "url":"znaleziono_pojazd.html",
+  "generationDate":new Date(1415188131666.14),
+  "isCanvasEnabled":false,
+  "variables":["OnLoadVariable"],
+  "page":{
+    "packageId":"d37b4aa657244a23ba3007e63498ed38",
+    "type":"Axure:Page",
+    "name":"znaleziono pojazd",
+    "notes":{
+},
+    "style":{
+      "baseStyle":"627587b6038d43cca051c114ac41ad32",
+      "pageAlignment":"near",
+      "fill":{
+        "fillType":"solid",
+        "color":0xFFFFFFFF},
+      "image":null,
+      "imageHorizontalAlignment":"near",
+      "imageVerticalAlignment":"near",
+      "imageRepeat":"auto",
+      "favicon":null,
+      "sketchFactor":"0",
+      "colorStyle":"appliedColor",
+      "fontName":"Applied Font",
+      "borderWidth":"0"},
+    "adaptiveStyles":{
+},
+    "interactionMap":{
+},
+    "diagram":{
+      "objects":[{
+          "id":"f883028c2c3b4645a83a2c6e5a80ec6f",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"buttonShape",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":520,
+              "y":140},
+            "size":{
+              "width":300,
+              "height":370}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"e39cc7e4c7d84e69a3df8bccf979bd21",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "location":{
+                  "x":520,
+                  "y":140},
+                "size":{
+                  "width":300,
+                  "height":370}},
+              "adaptiveStyles":{
+}}],
+          "images":{
+            "normal~":"images/home/u0.png"}},
+{
+          "id":"ad59372dcf6b49e990c6160750d4d381",
+          "label":"",
+          "type":"button",
+          "styleType":"button",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":520,
+              "y":140},
+            "size":{
+              "width":100,
+              "height":75}},
+          "adaptiveStyles":{
+},
+          "interactionMap":{
+            "onClick":{
+              "description":"OnClick",
+              "cases":[{
+                  "description":"Case 1",
+                  "isNewIfGroup":false,
+                  "actions":[{
+                      "action":"linkWindow",
+                      "description":"Open menu_rozwiniete in Current Window",
+                      "target":{
+                        "targetType":"page",
+                        "url":"menu_rozwiniete.html",
+                        "includeVariables":true},
+                      "linkType":"current"}]}]}},
+          "tabbable":true},
+{
+          "id":"b290bf4f8dcf406ea78f585fc70fbe5e",
+          "label":"",
+          "type":"textBox",
+          "styleType":"textBox",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":533,
+              "y":245},
+            "size":{
+              "width":220,
+              "height":25}},
+          "adaptiveStyles":{
+},
+          "placeholderText":"Szukaj pojazdu"},
+{
+          "id":"10b24cb05a2c44cebdb1d1bd9cf03ce1",
+          "label":"",
+          "type":"button",
+          "styleType":"button",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":760,
+              "y":245},
+            "size":{
+              "width":50,
+              "height":25}},
+          "adaptiveStyles":{
+}},
+{
+          "id":"c5163fc2c928458f9d072f29234bfa16",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"paragraph",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":533,
+              "y":300},
+            "size":{
+              "width":225,
+              "height":16}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"0f34e3dfe24047fd8e313387b49c661f",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "location":{
+                  "x":533,
+                  "y":300},
+                "size":{
+                  "width":225,
+                  "height":16}},
+              "adaptiveStyles":{
+}}],
+          "images":{
+            "normal~":"resources/images/transparent.gif"}},
+{
+          "id":"1b3bde93adff4a12b25f38fbc475f33d",
+          "label":"",
+          "type":"buttonShape",
+          "styleType":"paragraph",
+          "visible":true,
+          "style":{
+            "location":{
+              "x":533,
+              "y":326},
+            "size":{
+              "width":127,
+              "height":36}},
+          "adaptiveStyles":{
+},
+          "objects":[{
+              "id":"0a691d7cf21c48ce93b2e5f9016345c8",
+              "label":"",
+              "isContained":true,
+              "type":"richTextPanel",
+              "styleType":"paragraph",
+              "visible":true,
+              "style":{
+                "location":{
+                  "x":533,
+                  "y":326},
+                "size":{
+                  "width":127,
+                  "height":36}},
+              "adaptiveStyles":{
+}}],
+          "images":{
+            "normal~":"resources/images/transparent.gif"}}]}},
+  "masters":{
+},
+  "objectPaths":{
+    "f883028c2c3b4645a83a2c6e5a80ec6f":{
+      "scriptId":"u0"},
+    "e39cc7e4c7d84e69a3df8bccf979bd21":{
+      "scriptId":"u1"},
+    "ad59372dcf6b49e990c6160750d4d381":{
+      "scriptId":"u2"},
+    "b290bf4f8dcf406ea78f585fc70fbe5e":{
+      "scriptId":"u3"},
+    "10b24cb05a2c44cebdb1d1bd9cf03ce1":{
+      "scriptId":"u4"},
+    "c5163fc2c928458f9d072f29234bfa16":{
+      "scriptId":"u5"},
+    "0f34e3dfe24047fd8e313387b49c661f":{
+      "scriptId":"u6"},
+    "1b3bde93adff4a12b25f38fbc475f33d":{
+      "scriptId":"u7"},
+    "0a691d7cf21c48ce93b2e5f9016345c8":{
+      "scriptId":"u8"}}});

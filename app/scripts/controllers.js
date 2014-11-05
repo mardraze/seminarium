@@ -81,18 +81,24 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
         ]
       },
     ];
-    L.marker($scope.userPosition).addTo(map)
-      .bindPopup('Moja pozycja')
-      .openPopup();
+    if($scope.testing === undefined){
+      L.marker($scope.userPosition).addTo(map)
+        .bindPopup('Moja pozycja')
+        .openPopup();
+    }
+    
     $scope.asyncDone = true;
   }, 1);
-  var map = L.map('map').setView([54.370, 18.616], 15);
+  if($scope.testing === undefined){
+    var map = L.map('map').setView([54.370, 18.616], 15);
 
-  L.tileLayer( 'images/seminarium_atlas/MapQuest/{z}/{x}/{y}.jpg', {
-    maxZoom: 15,
-    minZoom: 9
-  })
-  .addTo(map);
+    L.tileLayer( 'images/seminarium_atlas/MapQuest/{z}/{x}/{y}.jpg', {
+        maxZoom: 15,
+        minZoom: 9
+      })
+      .addTo(map);
+        
+  }
 
 })
 

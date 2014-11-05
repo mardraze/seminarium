@@ -168,6 +168,7 @@ describe('Controller: MapCtrl', function () {
 
   beforeEach(inject(function ($controller, $rootScope) {
     scope = $rootScope.$new();
+    scope.testing = true;
     scope.asyncDone = false;
     MapCtrl = $controller('MapCtrl', {
       $scope: scope

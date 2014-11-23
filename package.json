@@ -1,7 +1,11 @@
 {
   "name": "Seminarium",
   "version": "0.0.1",
-  "dependencies": {},
+  "dependencies": {
+    "pg": "^4.0.0",
+    "pg-query-stream": "^0.7.0",
+    "sqldown": "^1.1.1"
+  },
   "devDependencies": {
     "cordova": "~3.5.0-0.2.6",
     "glob": "~4.0.5",

@@ -2,32 +2,24 @@
 'use strict';
 angular.module('Seminarium.controllers', ['Seminarium.services'])
 
-.controller('ArriveCtrl', function($scope, SearchService) {
-  setTimeout(function(){
-    SearchService.test();
-    $scope.busstops = [
-      {
-        name: 'Traugutta-Sobieskiego',
-        vehicles : [
-          {
-            'name' : '199',
-            'time' : 'za 1 minutę'
-          }
-        ]
-      },
-      {
-        name: 'Miszewskiego',
-        vehicles : [
-          {
-            'name' : '11',
-            'time' : 'za 9 minut'
-          }
-        ]
-      }
-    ];
-
-    $scope.asyncDone = true;
-  }, 1);
+.controller('ArriveCtrl', function($scope, SearchService, Sync) {
+  var getNearest = function(){
+    SearchService.getNearestBusstops(function(busstops){
+      $scope.busstops = busstops;
+      $scope.asyncDone = true;
+    });
+  };
+  SearchService.isLoaded({
+    onSuccess : function(){
+      getNearest();
+    },
+    onError : function(){
+      Sync.onDone = function(){
+        getNearest();
+      };
+      Sync.run();
+    },
+  });
 })
 
 .controller('MapCtrl', function($scope) {

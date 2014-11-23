@@ -18,6 +18,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'app/scripts/js-patch.js',
+      'app/bower_components/angular/angular.js',
       'app/bower_components/angular/angular.js',
       'app/bower_components/angular-mocks/angular-mocks.js',
       'app/bower_components/angular-animate/angular-animate.js',
@@ -26,6 +28,8 @@ module.exports = function(config) {
       'app/bower_components/angular-route/angular-route.js',
       'app/bower_components/angular-sanitize/angular-sanitize.js',
       'app/bower_components/angular-touch/angular-touch.js',
+      'app/bower_components/pouchdb/dist/pouchdb.js',
+      
       'app/scripts/**/*.js',
       'test/mock/**/*.js',
       'test/spec/**/*.js'

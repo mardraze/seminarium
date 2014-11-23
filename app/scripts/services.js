@@ -1,78 +1,249 @@
 'use strict';
+/*global PouchDB,$ */
 
 angular.module('Seminarium.services', [])
 
-.factory('db', function() {
-  //PouchDB.destroy('testdb');
-  var p = {};//PouchDB ? new PouchDB('testdb') : {}; // jshint ignore:line
-  return p;
-})
-.factory('SearchService', function(db) {
-
-  var pets = {};
-  return {
-    test: function(){},
-    all: function(onDone) {
-      
-      db.allDocs().then(function(allDocs){
-        var data = allDocs.rows;
-        var objCache = {};
-        var getNextRow = function(it){
-          if(it < allDocs.rows.length){
-            var id = data[it].id;
-            db.get(id).then(function(row){
-              objCache[id] = row;
-              getNextRow(it+1);
+.factory('DB', function() {
+  var DB = {
+    cache : {},
+    db : null,
+    name : 'Seminarium',
+    getCleanDb : function(onDone){
+      var db = new PouchDB(DB.name, function(){
+        db.destroy(function(err, info) { 
+          if(info.ok === true){
+            db = new PouchDB(DB.name, function(){
+              DB.db = db;
+              onDone(DB.db);
             });
-          }else{
-            pets = objCache;
-            if(onDone){
-              onDone(pets);
-            }
           }
-        };
-        getNextRow(0);
+        });
       });
-
-      if(onDone){
-        onDone(pets);
-      }
-      return pets;
     },
-    get: function(petId, onDone) {
-        db.get(petId).then(function(data){
-          pets[petId] = data;
-          if(onDone){
-            onDone(pets[petId]);
-          }
+    getDb : function(onDone){
+      if(DB.db === null){
+        var db = new PouchDB(DB.name, function(){
+          DB.db = db;
+          onDone(DB.db);
         });
-        if(onDone){
-          onDone(pets[petId]);
-        }
-        return pets[petId];
-      },
-    remove: function(petId, onDone) {
-      db.remove(petId, onDone);
-    },
-    put: function(id, title, description) {
-      var save = function(id) {
-        db.put({_id: id+'', title: title, description:description}).then(function(response) {
-          // Do something with the response
-          console.log('put: function', response);
-        });
-      };
-      if(id){
-        save(id);
       }else{
-        //db.info().then(function(info){
-          //id = info.update_seq;
-          //save(id);
-        //});
+        onDone(DB.db);
+      }
+    },
+    getTable : function(table, onDone){
+      if(undefined === DB.cache[table]){
+        DB.getDb(function(db){
+          db.get(table, function(err, tableData){
+            if(err){
+              if(undefined === DB.cache[table]){
+                DB.cache[table] = tableData;
+              }
+              onDone(DB.cache[table]);
+            }else{
+              onDone(null);
+            }
+          });
+        });
+      }else{
+        onDone(DB.cache[table]);
       }
     }
-    
   };
+  return DB;
+})
+.factory('Busstop', function(DB) {
+  var Busstop = {
+    getOneById : function(id, onDone){
+      DB.getTable('busstops', function(busstops){
+        var arr = busstops.busstops;
+        for(var i=0; i<arr.length; i++){
+          if(arr[i].id === id){
+            onDone(arr[i]);
+            return;
+          }
+        }
+        onDone(null);
+      });
+    },
+    getByRange : function(obj, onDone){
+      var lat1 = obj.centerLat * 1.0;
+      var lon1 = obj.centerLon * 1.0;
+      var distanceKm = obj.distanceKm;
+      DB.getTable('busstops', function(busstops){
+        var arr = busstops.busstops;
+        var result = [];
+        var toRadians = function(Value){
+          return Value * Math.PI / 180;
+        };
 
+        for(var i=0; i<arr.length; i++){
+          var lat2 = arr[i].lat * 1.0;
+          var lon2 = arr[i].lon * 1.0;
+          var R = 6371; // km
+          var O1 = toRadians(lat1);
+          var O2 = toRadians(lat2);
+          var DO = toRadians(lat2-lat1);
+          var DL = toRadians(lon2-lon1);
+          var a = Math.sin(DO/2) * Math.sin(DO/2) +
+                  Math.cos(O1) * Math.cos(O2) *
+                  Math.sin(DL/2) * Math.sin(DL/2);
+          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          var d = R * c;
+          
+          if(d < distanceKm){
+            arr[i].distance = d;
+            result.push(arr[i]);
+          }
+        }
+        onDone(result);
+      });
+    }
+  };
+  return Busstop;
+})
+.factory('Sync', function(DB, $http) {
+  var Sync = {
+    BASE_URL : 'http://localhost/test/test/psql_inzynierka/getJson.php',
+    db : null,
+    running : false,
+    currentBusstop : 0,
+    busstops : null,
+    onDone : function(){},
+    tables : ['company', 'line', 'positions'],
+    run : function(){
+      if(!Sync.running){
+        Sync.running = true;
+        Sync.getBusstops(function(busstops){
+          Sync.currentBusstops = busstops.length;
+          var getArrives = function(){
+            if(Sync.running){
+              if(Sync.currentBusstop < Sync.currentBusstops){
+                var busstopId = busstops[Sync.currentBusstop].id;
+                $http.get(Sync.BASE_URL+'?data=arrives&busstop_id='+busstopId).success(function(res){
+                  if(res.success){
+                    if(busstopId){
+                      busstops[Sync.currentBusstop].arrives = res.data;
+                      Sync.currentBusstop++;
+                      getArrives();
+                    }
+                  }
+                });
+              }else{
+                DB.getCleanDb(function(db){
+                  db.put({
+                    busstops : busstops
+                  }, 'busstops').then(function(){
+                    var current = 0;
+                    var getTable = function(){
+                      if(current < Sync.tables.length){
+                        var table = Sync.tables[current++];
+                        Sync.getTable(table, function(data){
+                          db.put({
+                            'data' : data
+                          }, table).then(function(){
+                            getTable();
+                          });
+                        });
+                      }else{
+                        Sync.onDone();
+                      }
+                    };
+                    getTable();
+                  });
+                });
+              }
+            }
+          };
+          getArrives();
+        });
+      }
+    },
+    
+    getBusstops : function(onDone){
+      if(Sync.busstops === null){
+        $http.get(Sync.BASE_URL+'?data=busstop').success(function(res){
+          if(res.success){
+            Sync.busstops = res.data;
+            onDone(Sync.busstops);
+          }
+        });
+      }else{
+        onDone(Sync.busstops);
+      }
+    },
+
+    getTable : function(table, onDone){
+      $.getJSON(Sync.BASE_URL+'?table='+table, function(res){
+        if(res.success){
+          onDone(res.data);
+        }
+      });
+    },
+    
+    pause : function(){
+      if(Sync.running){
+        Sync.running = false;
+      }
+    },
+    isLoaded : function(call){
+      var current = 0;
+      var checkTable = function(){
+        var table = allTables[current++];
+        DB.getTable(table, function(res){
+          if(res){
+            if(current < allTables.length){
+              checkTable();
+            }else{
+              call.onSuccess();
+            }
+          }else{
+            call.onError();
+          }
+        });
+      };
+      var allTables = ['busstops'];
+      var tables = Sync.tables;
+      for(var i=0; i<tables.length; i++){
+        allTables.push(tables[i]);
+      }
+      checkTable();
+    }
+  };
+  return Sync;
+})
+.factory('SearchService', function(Busstop, Sync) {
+  return {
+    test : function(){},
+    isLoaded : function(call){
+      Sync.isLoaded(call);
+    },
+    getNearestBusstops : function(onDone){
+      Busstop.getByRange(10, function(res){
+        console.log(res);
+        onDone([
+          {
+            name: 'Traugutta-Sobieskiego',
+            vehicles : [
+              {
+                'name' : '199',
+                'time' : 'za 1 minutę'
+              }
+            ]
+          },
+          {
+            name: 'Miszewskiego',
+            vehicles : [
+              {
+                'name' : '11',
+                'time' : 'za 9 minut'
+              }
+            ]
+          }
+        ]);        
+      });
+      
+    }
+  };
 })
 .factory('ToolsService', function() {
   return {

@@ -103,7 +103,7 @@ angular.module('Seminarium.services', [])
 })
 .factory('Sync', function(DB, $http) {
   var Sync = {
-    BASE_URL : 'http://localhost/test/test/psql_inzynierka/getJson.php',
+    BASE_URL : 'http://seminarium.mardraze.waw.pl/getJson.php',
     db : null,
     running : false,
     currentBusstop : 0,

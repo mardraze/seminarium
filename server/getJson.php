@@ -33,6 +33,7 @@ function fetch(&$res){
 }
 
 header('Content-Type: application/json; Charset=UTF8');
+header('Access-Control-Allow-Origin: *');
 
 $data = null;
 if(@$_REQUEST['data']){

@@ -1,5 +1,5 @@
 'use strict';
-/*global PouchDB,$ */
+/*global PouchDB */
 
 angular.module('Seminarium.services', [])
 
@@ -34,7 +34,7 @@ angular.module('Seminarium.services', [])
       if(undefined === DB.cache[table]){
         DB.getDb(function(db){
           db.get(table, function(err, tableData){
-            if(err){
+            if(err === null){
               if(undefined === DB.cache[table]){
                 DB.cache[table] = tableData;
               }
@@ -103,23 +103,25 @@ angular.module('Seminarium.services', [])
 })
 .factory('Sync', function(DB, $http) {
   var Sync = {
-    BASE_URL : 'http://seminarium.mardraze.waw.pl/getJson.php',
+    //BASE_URL : 'http://seminarium.mardraze.waw.pl/getJson.php',
+    BASE_URL : 'http://localhost/test/phonegap/Seminarium/server/getJson.php',
     db : null,
     running : false,
     currentBusstop : 0,
     busstops : null,
     onDone : function(){},
+    onProgress : function(){},
     tables : ['company', 'line', 'positions'],
     run : function(){
       if(!Sync.running){
         Sync.running = true;
         Sync.getBusstops(function(busstops){
-          Sync.currentBusstops = busstops.length;
           var getArrives = function(){
             if(Sync.running){
-              if(Sync.currentBusstop < Sync.currentBusstops){
+              if(Sync.currentBusstop < busstops.length){
                 var busstopId = busstops[Sync.currentBusstop].id;
-                $http.get(Sync.BASE_URL+'?data=arrives&busstop_id='+busstopId).success(function(res){
+                Sync.httpGet(Sync.BASE_URL+'?data=arrives&busstop_id='+busstopId, function(res){
+                  Sync.onProgress((Sync.currentBusstop/busstops.length) * 100);
                   if(res.success){
                     if(busstopId){
                       busstops[Sync.currentBusstop].arrives = res.data;
@@ -161,7 +163,7 @@ angular.module('Seminarium.services', [])
     
     getBusstops : function(onDone){
       if(Sync.busstops === null){
-        $http.get(Sync.BASE_URL+'?data=busstop').success(function(res){
+        Sync.httpGet(Sync.BASE_URL+'?data=busstop', function(res){
           if(res.success){
             Sync.busstops = res.data;
             onDone(Sync.busstops);
@@ -171,9 +173,11 @@ angular.module('Seminarium.services', [])
         onDone(Sync.busstops);
       }
     },
-
+    httpGet : function(url, onSuccess){
+      $http.get(url).success(onSuccess);
+    },
     getTable : function(table, onDone){
-      $.getJSON(Sync.BASE_URL+'?table='+table, function(res){
+      Sync.httpGet(Sync.BASE_URL+'?table='+table, function(res){
         if(res.success){
           onDone(res.data);
         }
@@ -197,7 +201,7 @@ angular.module('Seminarium.services', [])
               call.onSuccess();
             }
           }else{
-            call.onError();
+            call.onError(table);
           }
         });
       };
@@ -211,37 +215,73 @@ angular.module('Seminarium.services', [])
   };
   return Sync;
 })
-.factory('SearchService', function(Busstop, Sync) {
+.factory('UserPosition', function() {
+  return {
+    get : function(onDone){
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position){
+          onDone(position.coords.latitude, position.coords.longitude);
+        });
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+      }
+    }
+  };
+})
+.factory('SearchService', function(Busstop, Sync, UserPosition) {
   return {
     test : function(){},
     isLoaded : function(call){
       Sync.isLoaded(call);
     },
     getNearestBusstops : function(onDone){
-      Busstop.getByRange(10, function(res){
-        console.log(res);
-        onDone([
-          {
-            name: 'Traugutta-Sobieskiego',
-            vehicles : [
-              {
-                'name' : '199',
-                'time' : 'za 1 minutę'
+      UserPosition.get(function(lat, lon){
+        
+        Busstop.getByRange({
+          centerLat : lat,
+          centerLon : lon,
+          distanceKm : 20
+        }, function(res){
+          var onDoneData = [];
+          var getVehicles = function(arrives){
+            var result = [];
+            var date = new Date();
+            var weekTimeOffset = parseInt((date.getTime() % (24 * 3600 * 1000 * 7)) / 1000);
+            
+            var vehicles = {};
+            for(var i=0; i<arrives.length; i++){
+              var vehicleName = arrives[i].name;
+              if(arrives[i].time > weekTimeOffset){
+                if(undefined === vehicles[vehicleName] || vehicles[vehicleName].weekTime > arrives[i].time){
+                  vehicles[vehicleName] = {
+                    'name' : vehicleName,
+                    'weekTime' : arrives[i].time
+                  };
+                }
               }
-            ]
-          },
-          {
-            name: 'Miszewskiego',
-            vehicles : [
-              {
-                'name' : '11',
-                'time' : 'za 9 minut'
-              }
-            ]
+            }
+            
+            for(var key in vehicles){
+              result.push({
+                'name' : key,
+                'time' : vehicles[key].weekTime
+              });
+            }
+
+            console.log('getVehicles',result);
+            return result;
+          };
+          for(var i=0; i<res.length; i++){
+            onDoneData.push({
+              name: res[i].name,
+              vehicles : getVehicles(res[i].arrives)
+            });
           }
-        ]);        
+          
+          console.log(onDoneData);
+          onDone(onDoneData)
+        });
       });
-      
     }
   };
 })

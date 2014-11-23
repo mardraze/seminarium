@@ -1,5 +1,9 @@
 <ion-view title="Dane">
   <ion-content padding="true">
+    <div ng-if="progress > 0">
+      <h1 class="title">Ładowanie danych, proszę czekać</h1>
+      <progress ng-if="progress > 0" max="100" value="{{ progress }}"></progress>
+    </div>    
     <div class="row">
       <div class="col"><h2>{{ data.label }}</h2></div>
     </div>
@@ -22,7 +26,7 @@
         </button>
       </div>
       <div class="col">
-        <button class="button button-full button-energized">
+        <button ng-click="onDeleteClick()" class="button button-full button-energized">
           Usuń
         </button>
       </div>

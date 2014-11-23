@@ -47,12 +47,13 @@ if(@$_REQUEST['data']){
 				$row['lon'] = @$latlon[1];
 				unset($row['position']);
 				$data[] = $row;
+              //break;//DEV
 			}
 		}
 	}elseif($_REQUEST['data'] == 'arrives'){
 		if(@$_REQUEST['busstop_id'] * 1 > 0){
 			$data = array();
-			$res = query('select * from arrive where busstop_id='.$_REQUEST['busstop_id']);
+			$res = query('select a.*, b.name from arrive a LEFT JOIN line b ON a.line_id=b.id where a.busstop_id='.$_REQUEST['busstop_id']);
 			while ($row = fetch($res)) {
 				$data[] = $row;
 			}

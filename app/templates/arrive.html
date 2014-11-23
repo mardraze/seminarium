@@ -9,5 +9,9 @@
         <div class="col">{{ vehicle.time }}</div>
       </div>
     </div>
+    <div ng-if="progress > 0">
+      <h1 class="title">Ładowanie danych, proszę czekać</h1>
+      <progress ng-if="progress > 0" max="100" value="{{ progress }}"></progress>
+    </div>
   </ion-content>
 </ion-view>

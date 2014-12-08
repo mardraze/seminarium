@@ -3,7 +3,9 @@
     <div class="row" ng-repeat="data in list">
       <div class="col" data-id="{{ data.id }}">{{ data.name }}</div>
       <div class="col">
-      <button class="button button-small button-positive" ng-click="details({{ data.id }})">Szczegóły</button>
+        <button class="button button-small button-positive" ng-click="details({{ data.id }})">Szczegóły</button>
+      </div>
     </div>
+    <div choose-file></div>
   </ion-content>
 </ion-view>

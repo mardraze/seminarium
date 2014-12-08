@@ -13,5 +13,9 @@
       <h1 class="title">Ładowanie danych, proszę czekać</h1>
       <progress ng-if="progress > 0" max="100" value="{{ progress }}"></progress>
     </div>
+    <div ng-if="error">
+      <h1 class="title">Nie udało się wczytać danych</h1>
+      <button class="button button-small button-positive" ng-click="gotoData()">Załaduj dane</button>
+    </div>
   </ion-content>
 </ion-view>

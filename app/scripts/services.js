@@ -2,12 +2,32 @@
 /*global PouchDB */
 
 angular.module('Seminarium.services', [])
-
-.factory('DB', function() {
+.factory('ConfigService', function() {
+  return {
+    geolocation : {
+      options : { 
+        maximumAge: 3000, 
+        timeout: 1000, 
+        enableHighAccuracy: true 
+      },
+      defaultPosition : {
+        lat : 54.37157,
+        lon : 18.61234
+      }
+    },
+    db : {
+      name : 'Seminarium'
+    },
+    sync : {
+      base_url : 'http://seminarium.mardraze.waw.pl/getJson.php'
+    }
+  };
+})
+.factory('DB', function(ConfigService) {
   var DB = {
     cache : {},
     db : null,
-    name : 'Seminarium',
+    name : ConfigService.db.name,
     getCleanDb : function(onDone){
       var db = new PouchDB(DB.name, function(){
         db.destroy(function(err, info) { 
@@ -75,7 +95,6 @@ angular.module('Seminarium.services', [])
         var toRadians = function(Value){
           return Value * Math.PI / 180;
         };
-
         for(var i=0; i<arr.length; i++){
           var lat2 = arr[i].lat * 1.0;
           var lon2 = arr[i].lon * 1.0;
@@ -89,7 +108,6 @@ angular.module('Seminarium.services', [])
                   Math.sin(DL/2) * Math.sin(DL/2);
           var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
           var d = R * c;
-          
           if(d < distanceKm){
             arr[i].distance = d;
             result.push(arr[i]);
@@ -101,9 +119,9 @@ angular.module('Seminarium.services', [])
   };
   return Busstop;
 })
-.factory('Sync', function(DB, $http) {
+.factory('Sync', function(DB, $http, ConfigService) {
   var Sync = {
-    //BASE_URL : 'http://seminarium.mardraze.waw.pl/getJson.php',
+    //BASE_URL : ConfigService.sync.base_url,
     BASE_URL : 'http://localhost/test/phonegap/Seminarium/server/getJson.php',
     db : null,
     running : false,
@@ -111,6 +129,8 @@ angular.module('Seminarium.services', [])
     busstops : null,
     onDone : function(){},
     onProgress : function(){},
+    onError : function(){},
+    fromObject : {},
     tables : ['company', 'line', 'positions'],
     run : function(){
       if(!Sync.running){
@@ -120,7 +140,7 @@ angular.module('Seminarium.services', [])
             if(Sync.running){
               if(Sync.currentBusstop < busstops.length){
                 var busstopId = busstops[Sync.currentBusstop].id;
-                Sync.httpGet(Sync.BASE_URL+'?data=arrives&busstop_id='+busstopId, function(res){
+                Sync.getData('?data=arrives&busstop_id='+busstopId, function(res){
                   Sync.onProgress((Sync.currentBusstop/busstops.length) * 100);
                   if(res.success){
                     if(busstopId){
@@ -147,6 +167,7 @@ angular.module('Seminarium.services', [])
                           });
                         });
                       }else{
+                        Sync.running = false;
                         Sync.onDone();
                       }
                     };
@@ -163,7 +184,7 @@ angular.module('Seminarium.services', [])
     
     getBusstops : function(onDone){
       if(Sync.busstops === null){
-        Sync.httpGet(Sync.BASE_URL+'?data=busstop', function(res){
+        Sync.getData('?data=busstop', function(res){
           if(res.success){
             Sync.busstops = res.data;
             onDone(Sync.busstops);
@@ -173,11 +194,19 @@ angular.module('Seminarium.services', [])
         onDone(Sync.busstops);
       }
     },
-    httpGet : function(url, onSuccess){
-      $http.get(url).success(onSuccess);
+    getData : function(url, onSuccess){
+      if(Sync.fromObject && Sync.fromObject.hasOwnProperty(url)){
+        onSuccess(Sync.fromObject[url]);
+      }else{
+        $http.get(Sync.BASE_URL+url).success(function(res){
+          Sync.fromObject[url] = res;
+          onSuccess(res);
+        });
+      }
+      
     },
     getTable : function(table, onDone){
-      Sync.httpGet(Sync.BASE_URL+'?table='+table, function(res){
+      Sync.getData('?table='+table, function(res){
         if(res.success){
           onDone(res.data);
         }
@@ -190,6 +219,8 @@ angular.module('Seminarium.services', [])
       }
     },
     isLoaded : function(call){
+      call.onError();
+      return;
       var current = 0;
       var checkTable = function(){
         var table = allTables[current++];
@@ -215,13 +246,18 @@ angular.module('Seminarium.services', [])
   };
   return Sync;
 })
-.factory('UserPosition', function() {
+.factory('UserPosition', function(ConfigService) {
+  var geolocationMessageShown = false;
   return {
-    get : function(onDone){
+    get : function(onDone, onError){
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position){
+          console.log('Geolocation taken: ['+position.coords.latitude +':'+ position.coords.longitude+']');
           onDone(position.coords.latitude, position.coords.longitude);
-        });
+        }, function(){
+          console.log('Default Geolocation taken');
+          onDone(ConfigService.geolocation.defaultPosition.lat, ConfigService.geolocation.defaultPosition.lon);
+        }, ConfigService.geolocation.options);
       } else {
         console.log("Geolocation is not supported by this browser.");
       }
@@ -229,60 +265,142 @@ angular.module('Seminarium.services', [])
   };
 })
 .factory('SearchService', function(Busstop, Sync, UserPosition) {
+  var cache;
+  var lastGet = new Date();
   return {
     test : function(){},
     isLoaded : function(call){
       Sync.isLoaded(call);
     },
     getNearestBusstops : function(onDone){
-      UserPosition.get(function(lat, lon){
-        
-        Busstop.getByRange({
-          centerLat : lat,
-          centerLon : lon,
-          distanceKm : 20
-        }, function(res){
-          var onDoneData = [];
-          var getVehicles = function(arrives){
-            var result = [];
-            var date = new Date();
-            var weekTimeOffset = parseInt((date.getTime() % (24 * 3600 * 1000 * 7)) / 1000);
-            
-            var vehicles = {};
-            for(var i=0; i<arrives.length; i++){
-              var vehicleName = arrives[i].name;
-              if(arrives[i].time > weekTimeOffset){
-                if(undefined === vehicles[vehicleName] || vehicles[vehicleName].weekTime > arrives[i].time){
-                  vehicles[vehicleName] = {
-                    'name' : vehicleName,
-                    'weekTime' : arrives[i].time
-                  };
+      var dateNow = new Date();
+
+      if(true || lastGet == null || lastGet.getTime()+60*1000 < dateNow.getTime()){
+        lastGet = dateNow;
+        UserPosition.get(function(lat, lon){
+          Busstop.getByRange({
+            centerLat : lat,
+            centerLon : lon,
+            distanceKm : 20
+          }, function(res){
+            var onDoneData = [];
+            var getVehicles = function(arrives){
+              var result = [];
+              var date = new Date();
+              var dayTime = parseInt((date.getTime() % (24 * 3600 * 1000)) / 1000);
+
+              var vehicles = {};
+              for(var i=0; i<arrives.length; i++){
+                var vehicleName = arrives[i].name;
+                if(arrives[i].time > dayTime){
+                  if(undefined === vehicles[vehicleName]
+                    || (vehicles[vehicleName].weekTime > arrives[i].time &&vehicles[vehicleName].weekTime - arrives[i].time < 3600)){
+                      vehicles[vehicleName] = {
+                        'name' : vehicleName,
+                        'dayTime' : arrives[i].time
+                      };
+                  }
                 }
               }
-            }
-            
-            for(var key in vehicles){
-              result.push({
-                'name' : key,
-                'time' : vehicles[key].weekTime
+
+              for(var key in vehicles){
+                var time = parseInt((vehicles[key].dayTime - dayTime)/60);
+                if(time < 10){
+                  time = 'za '+time+' minut'+(time == 1 ? 'ę' : (time < 5) ? 'y' : '');
+                }else{
+                  var hour = parseInt(vehicles[key].dayTime/3600)+1;
+                  var min = (vehicles[key].dayTime/60) % 60;
+                  time = hour+':'+(min < 10 ? '0' : '')+min;
+                }
+                result.push({
+                  'name' : (key[0] == '0' ? key.substr(1) : key),
+                  'time' : time,
+                  'dayTime' : vehicles[key].dayTime
+                });
+              }
+              result.sort(function(a, b){
+                return a.dayTime - b.dayTime;
+              });
+              return result;
+            };
+            for(var i=0; i<res.length; i++){
+              onDoneData.push({
+                name: res[i].name,
+                vehicles : getVehicles(res[i].arrives),
+                id : res[i].id,
+                position : {
+                  lat : res[i].lat,
+                  lng : res[i].lon
+                },
+                route : []
               });
             }
 
-            console.log('getVehicles',result);
-            return result;
-          };
-          for(var i=0; i<res.length; i++){
-            onDoneData.push({
-              name: res[i].name,
-              vehicles : getVehicles(res[i].arrives)
-            });
-          }
-          
-          console.log(onDoneData);
-          onDone(onDoneData)
+            cache = onDoneData;
+            onDone(onDoneData);
+          });
         });
-      });
+      }else{
+        onDone(cache);
+      }
     }
+  };
+})
+.factory('ChooseFile', function($ionicPopup, $timeout) {
+  
+  return {
+    openNative : function(win, fail){
+      return cordova.exec(
+        function (args) { 
+          if(win !== undefined) { 
+            win(args); 
+          }
+        },
+        function (args) { 
+          if(fail !== undefined) { 
+            fail(args); 
+          } 
+        },
+        "FileChooser", "open", []
+      );
+    },
+    open : function(params){
+      // Triggered on a button click, or some other target
+      var $scope = params.scope;
+      $scope.data = {}
+      var title = params.title ? params.title : '';
+      var subTitle = params.subTitle ? params.subTitle : '';
+      
+      // An elaborate, custom popup
+      var myPopup = $ionicPopup.show({
+        template: '<button class="button button-small button-balanced">Nowy folder</button>',
+        title: title,
+        subTitle: subTitle,
+        scope: $scope,
+        buttons: [
+          { text: 'Cancel' },
+          {
+            text: '<b>Zapisz</b>',
+            type: 'button-positive',
+            onTap: function(e) {
+              if (!$scope.data.wifi) {
+                //don't allow the user to close unless he enters wifi password
+                e.preventDefault();
+              } else {
+                return $scope.data.wifi;
+              }
+            }
+          },
+        ]
+      });
+      myPopup.then(function(res) {
+        console.log('Tapped!', res);
+      });
+      $timeout(function() {
+        myPopup.close(); //close the popup after 3 seconds for some reason
+      }, 3000);
+    }
+    
   };
 })
 .factory('ToolsService', function() {
@@ -351,5 +469,4 @@ angular.module('Seminarium.services', [])
     }
   };
 })
-
 ;

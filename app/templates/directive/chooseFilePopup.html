@@ -1,0 +1,14 @@
+<div class="bar bar-header">
+  <h1 class="title">{{ popupTitle }}</h1>
+</div>
+<button ng-if="parentDir != null" class="button button-small button-positive" ng-click="popupChooseEntry(parentDir)">{{ popupUpDir }}</button>
+<ion-scroll direction="y" style="height: 200px">
+  <div class="list">
+    <a class="item item-icon-left" ng-click="popupChooseEntry(entry)" ng-repeat="entry in popupEntries">
+      <i ng-if="entry.isDirectory" class="icon ion-folder"></i>
+      <i ng-if="entry.isFile" class="icon ion-document"></i>
+      <span style="color: red" ng-if="entry.fullPath == popupResult">{{ entry.name }}</span>
+      <span ng-if="entry.fullPath != popupResult">{{ entry.name }}</span>
+    </a>
+  </div>
+</ion-scroll>

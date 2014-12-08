@@ -39,7 +39,7 @@ $data = null;
 if(@$_REQUEST['data']){
 	if($_REQUEST['data'] == 'busstop'){
 		$data = array();
-		$res = query('select * from busstop');
+		$res = query('select * from busstop WHERE id IN (SELECT DISTINCT busstop_id FROM arrive)');
 		while ($row = fetch($res)) {
 			$latlon = explode(';',$row['position']);
 			if(count($latlon) == 2){

@@ -29,7 +29,7 @@ module.exports = function(config) {
       'app/bower_components/angular-sanitize/angular-sanitize.js',
       'app/bower_components/angular-touch/angular-touch.js',
       'app/bower_components/pouchdb/dist/pouchdb.js',
-      
+      'app/bower_components/leaflet/dist/leaflet.js',
       'app/scripts/**/*.js',
       'test/mock/**/*.js',
       'test/spec/**/*.js'

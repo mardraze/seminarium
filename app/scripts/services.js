@@ -6,7 +6,7 @@ angular.module('Seminarium.services', [])
   return {
     geolocation : {
       options : { 
-        maximumAge: 3000, 
+        maximumAge: 20000, 
         timeout: 1000, 
         enableHighAccuracy: true 
       },
@@ -17,6 +17,7 @@ angular.module('Seminarium.services', [])
     },
     db : {
       name : 'Seminarium'
+      //name : 'http://localhost:5984/seminarium'
     },
     sync : {
       base_url : 'http://seminarium.mardraze.waw.pl/getJson.php'
@@ -24,7 +25,9 @@ angular.module('Seminarium.services', [])
   };
 })
 .factory('DB', function(ConfigService) {
+
   var DB = {
+      
     cache : {},
     db : null,
     name : ConfigService.db.name,
@@ -68,8 +71,106 @@ angular.module('Seminarium.services', [])
         onDone(DB.cache[table]);
       }
     }
+    
   };
   return DB;
+})
+.factory('Leaflet', function(DB, UserPosition) {
+  var leaflet = {
+    scope : null,
+    setup : function($scope){
+      angular.extend($scope, {
+        defaults: {
+          tileLayer: 'images/seminarium_atlas/MapQuest/{z}/{x}/{y}.jpg',
+          maxZoom: 15,
+          minZoom: 9,
+          touchZoom : true
+        },
+        center: {
+          lat: 54.370,
+          lng: 18.616,
+          zoom: 15
+        },
+        paths : {},
+        'markers' : {}
+      });
+      leaflet.scope = $scope;
+    },    
+    setBusstopMarker : function(busstop, center){
+      var lat = (busstop.position ? busstop.position.lat :  busstop.lat)  * 1.0;
+      var lng = (busstop.position ? busstop.position.lng :  busstop.lon)  * 1.0;
+      leaflet.scope.markers[busstop.id] = {
+        lat: lat,
+        lng: lng,
+        message: busstop.name,
+        focus: false,
+        draggable: false
+      };
+      if(center){
+        leaflet.scope.center = {
+          lat: lat,
+          lng: lng,
+          zoom: 15
+        };
+      }
+      
+    },
+    setUserMarker : function(onDone, center){
+      UserPosition.get(function(lat, lng){
+        leaflet.scope.userPosition = {
+          lat : lat,
+          lng : lng
+        };
+        leaflet.scope.markers['user_position'] = {
+            lat: lat,
+            lng: lng,
+            icon: {
+              iconUrl: 'images/marker-icon-red.png',
+              iconAnchor: [14, 0]         
+            },
+            message: "Moja pozycja",
+            focus: false,
+            draggable: false
+        };
+        if(center){
+          leaflet.scope.center = {
+            lat: lat,
+            lng: lng,
+            zoom: 15
+          };
+        }
+        leaflet.scope.$apply();
+        onDone();
+      });
+    },
+    pathUserToBusstop : function(busstop){
+      leaflet.path([
+        [leaflet.scope.userPosition.lat, leaflet.scope.userPosition.lng],
+        [busstop.lat, busstop.lon]
+      ]);
+    },
+    
+    path : function(route){
+      var latlngs = [];
+      for(var i=0; i<route.length; i++){
+        latlngs.push({
+          lat : route[i][0] * 1.0,
+          lng : route[i][1] * 1.0
+        });
+      }
+      
+      leaflet.scope.paths['path'] = {
+          color: '#008000',
+          weight: 8,
+          latlngs: latlngs
+      };
+      leaflet.scope.$apply();
+    }
+    
+    
+  };
+  
+  return leaflet;
 })
 .factory('Busstop', function(DB) {
   var Busstop = {
@@ -96,22 +197,31 @@ angular.module('Seminarium.services', [])
           return Value * Math.PI / 180;
         };
         for(var i=0; i<arr.length; i++){
-          var lat2 = arr[i].lat * 1.0;
-          var lon2 = arr[i].lon * 1.0;
-          var R = 6371; // km
-          var O1 = toRadians(lat1);
-          var O2 = toRadians(lat2);
-          var DO = toRadians(lat2-lat1);
-          var DL = toRadians(lon2-lon1);
-          var a = Math.sin(DO/2) * Math.sin(DO/2) +
-                  Math.cos(O1) * Math.cos(O2) *
-                  Math.sin(DL/2) * Math.sin(DL/2);
-          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-          var d = R * c;
-          if(d < distanceKm){
-            arr[i].distance = d;
-            result.push(arr[i]);
+          if(arr[i].name){
+            var lat2 = arr[i].lat * 1.0;
+            var lon2 = arr[i].lon * 1.0;
+            var R = 6371; // km
+            var O1 = toRadians(lat1);
+            var O2 = toRadians(lat2);
+            var DO = toRadians(lat2-lat1);
+            var DL = toRadians(lon2-lon1);
+            var a = Math.sin(DO/2) * Math.sin(DO/2) +
+                    Math.cos(O1) * Math.cos(O2) *
+                    Math.sin(DL/2) * Math.sin(DL/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            var d = R * c;
+            if(d < distanceKm){
+              arr[i].distance = d;
+              result.push(arr[i]);
+            }
           }
+        }
+        
+        result.sort(function(a, b){
+          return a.distance - b.distance;
+        });
+        if(obj.count > 0){
+          result = result.slice(obj.offset*1, (obj.offset*1)+obj.count);
         }
         onDone(result);
       });
@@ -121,6 +231,7 @@ angular.module('Seminarium.services', [])
 })
 .factory('Sync', function(DB, $http, ConfigService) {
   var Sync = {
+    
     //BASE_URL : ConfigService.sync.base_url,
     BASE_URL : 'http://localhost/test/phonegap/Seminarium/server/getJson.php',
     db : null,
@@ -133,6 +244,7 @@ angular.module('Seminarium.services', [])
     fromObject : {},
     tables : ['company', 'line', 'positions'],
     run : function(){
+      console.log('Sync.run');
       if(!Sync.running){
         Sync.running = true;
         Sync.getBusstops(function(busstops){
@@ -183,6 +295,7 @@ angular.module('Seminarium.services', [])
     },
     
     getBusstops : function(onDone){
+      console.log('getBusstops');
       if(Sync.busstops === null){
         Sync.getData('?data=busstop', function(res){
           if(res.success){
@@ -196,10 +309,21 @@ angular.module('Seminarium.services', [])
     },
     getData : function(url, onSuccess){
       if(Sync.fromObject && Sync.fromObject.hasOwnProperty(url)){
-        onSuccess(Sync.fromObject[url]);
+        onSuccess(JSON.parse(Sync.fromObject[url]));
       }else{
-        $http.get(Sync.BASE_URL+url).success(function(res){
-          Sync.fromObject[url] = res;
+        console.log('getData '+url);
+        var dataParams = url.replace('?', '').split('&');
+        var keys = [];
+        var values = [];
+        for(var i=0; i<dataParams.length; i++){
+          var kv = dataParams[i].split('=');
+          keys.push(kv[0]);
+          values.push(kv[1]);
+        }
+        var dataUrl = 'data/'+keys.join('_')+'/'+values.join('_')+'.data';
+        //var dataUrl = Sync.BASE_URL+url;
+        console.log(dataUrl);
+        $http.get(dataUrl).success(function(res){
           onSuccess(res);
         });
       }
@@ -219,8 +343,6 @@ angular.module('Seminarium.services', [])
       }
     },
     isLoaded : function(call){
-      call.onError();
-      return;
       var current = 0;
       var checkTable = function(){
         var table = allTables[current++];
@@ -243,6 +365,7 @@ angular.module('Seminarium.services', [])
       }
       checkTable();
     }
+    
   };
   return Sync;
 })
@@ -252,7 +375,7 @@ angular.module('Seminarium.services', [])
     get : function(onDone, onError){
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position){
-          console.log('Geolocation taken: ['+position.coords.latitude +':'+ position.coords.longitude+']');
+          //console.log('Geolocation taken: ['+position.coords.latitude +':'+ position.coords.longitude+']');
           onDone(position.coords.latitude, position.coords.longitude);
         }, function(){
           console.log('Default Geolocation taken');
@@ -272,7 +395,7 @@ angular.module('Seminarium.services', [])
     isLoaded : function(call){
       Sync.isLoaded(call);
     },
-    getNearestBusstops : function(onDone){
+    getNearestBusstops : function(onDone, count, offset, params){
       var dateNow = new Date();
 
       if(true || lastGet == null || lastGet.getTime()+60*1000 < dateNow.getTime()){
@@ -281,7 +404,9 @@ angular.module('Seminarium.services', [])
           Busstop.getByRange({
             centerLat : lat,
             centerLon : lon,
-            distanceKm : 20
+            distanceKm : 20,
+            count : count,
+            offset : offset
           }, function(res){
             var onDoneData = [];
             var getVehicles = function(arrives){
@@ -310,7 +435,7 @@ angular.module('Seminarium.services', [])
                 }else{
                   var hour = parseInt(vehicles[key].dayTime/3600)+1;
                   var min = (vehicles[key].dayTime/60) % 60;
-                  time = hour+':'+(min < 10 ? '0' : '')+min;
+                  time = (hour%24)+':'+(min < 10 ? '0' : '')+min;
                 }
                 result.push({
                   'name' : (key[0] == '0' ? key.substr(1) : key),
@@ -324,24 +449,26 @@ angular.module('Seminarium.services', [])
               return result;
             };
             for(var i=0; i<res.length; i++){
-              onDoneData.push({
-                name: res[i].name,
-                vehicles : getVehicles(res[i].arrives),
-                id : res[i].id,
-                position : {
-                  lat : res[i].lat,
-                  lng : res[i].lon
-                },
-                route : []
-              });
+              if(res[i].name){
+                onDoneData.push({
+                  name: res[i].name,
+                  vehicles : params && params.hasOwnProperty('without_vehicles') ? [] : getVehicles(res[i].arrives),
+                  id : res[i].id,
+                  position : {
+                    lat : res[i].lat,
+                    lng : res[i].lon
+                  },
+                  route : []
+                });
+              }
             }
 
             cache = onDoneData;
-            onDone(onDoneData);
+            onDone(onDoneData, offset);
           });
         });
       }else{
-        onDone(cache);
+        onDone(cache, offset);
       }
     }
   };

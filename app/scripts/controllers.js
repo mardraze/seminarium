@@ -2,130 +2,133 @@
 'use strict';
 angular.module('Seminarium.controllers', ['Seminarium.services'])
 
-.controller('ArriveCtrl', function($scope, SearchService, ConfigService, Sync) {
+.controller('ArriveCtrl', function($scope, $ionicLoading, $location, SearchService, ConfigService, Sync, DB) {
+  
   console.log('ArriveCtrl Start');
+  var enabled = true;
+  $scope.$on('$destroy', function dismiss() {
+    enabled = false;
+    offset = 0;
+  });
   $scope.progress = 0;
+  $ionicLoading.show({
+    template: 'Wczytywanie...'
+  });
+  var count = 1;
+  var offset = 0;
+  $scope.busstops = [];
   var getNearest = function(){
-    console.log('getNearest');
-    SearchService.getNearestBusstops(function(busstops){
-      var str = JSON.stringify(Sync.fromObject);
-      var length = str.length;
-      var i=0;
-      var offset = 1024;
-
-      var request = function(url, success){
-        var req = new XMLHttpRequest();
-        req.open('GET', url, true); 
-        req.onreadystatechange = function (aEvt) {
-          if (req.readyState == 4) {
-            success();
-          }
-        };
-        req.send(null);
-      };
-      
-      var writePost = function(){
-        if(i == 0){
-          request('http://localhost/test/test/js-big/data.php?clean=1', writePost);
-        }else{
-          if(offset*i < length){
-            request('http://localhost/test/test/js-big/data.php?data='+str.substr((i-1)*offset, i*offset), writePost);
-            console.log((offset*i)+' / '+length);
-          }else{
-            console.log('Koniec!');
-          }
-          
+    console.log('ArriveCtrl::getNearest '+offset+' ');
+    SearchService.getNearestBusstops(function(busstops, offsetResult){
+      if(busstops && busstops.length > 0 && enabled){
+        for(var i=0; i<busstops.length; i++){
+          $scope.busstops.push(busstops[i]);
         }
-        i++;
-      };
-      writePost();
-      $scope.busstops = busstops;
-      $scope.asyncDone = true;
-      $scope.$apply();
-    });
-  };
-  
-  SearchService.isLoaded({
-    onSuccess : function(){
-      console.log('isLoaded onSuccess');
-      getNearest();
-    },
-    onError : function(table){
-      console.log('isLoaded onError');
-      Sync.onDone = function(){
-        console.log('Sync.onDone');
-        $scope.progress = 0;
+        $scope.asyncDone = true;
         $scope.$apply();
-        getNearest();
-      };
-      Sync.onProgress = function(progress){
-        console.log('Sync.onProgress '+progress);
-        $scope.progress = progress;
-      };
-      Sync.onError = function(){
-        $scope.gotoData = function(){
-          window.location.hash='#/tab/data';
-        };
-        $scope.error = true;
-        $scope.$apply();
-      };
-      
-      Sync.run();
-    }
-  });
-  
-})
-
-.controller('MapCtrl', function($scope, UserPosition, SearchService) {
-  var map = L.map('map').setView([54.370, 18.616], 15);
-
-  L.tileLayer( 'images/seminarium_atlas/MapQuest/{z}/{x}/{y}.jpg', {
-    maxZoom: 15,
-    minZoom: 9
-  })
-  .addTo(map);
-
-  UserPosition.get(function(lat, lng){
-    $scope.userPosition = {
-      lat : lat,
-      lng : lng
-    };
-    $scope.$apply();
-    L.marker($scope.userPosition).addTo(map)
-      .bindPopup('Moja pozycja')
-      .openPopup();
-  });
-  $scope.zoom = 15;
-  SearchService.getNearestBusstops(function(busstops){
-    if(busstops){
-      for(var i=0; i<busstops.length && i < 10; i++){
-        L.marker($scope.userPosition).addTo(map)
-          .bindPopup(busstops[i].name)
-          .openPopup();
+        $ionicLoading.hide();
+        offset += count;
+        setTimeout(getNearest, 500);
       }
-    }
-    
-  });
+    }, count, offset);
+  };
+  setTimeout(function(){
+    SearchService.isLoaded({
+      onSuccess : function(){
+        console.log('isLoaded onSuccess');
+        getNearest();
+      },
+      onError : function(table){
+        console.log('isLoaded onError');
+        Sync.onDone = function(){
+          console.log('Sync.onDone');
+          $scope.progress = 0;
+          $scope.$apply();
+          getNearest();
+        };
+        Sync.onProgress = function(progress){
+          console.log('Sync.onProgress '+progress);
+          $scope.progress = progress;
+        };
+        Sync.onError = function(){
+          $scope.gotoData = function(){
+            window.location.hash='#/tab/data';
+          };
+          $scope.error = true;
+          $scope.$apply();
+        };
 
+        Sync.run();
+      }
+    });
+  }, 1000);
 })
 
-.controller('SearchCtrl', function($scope) {
+.controller('MapCtrl', function($scope, SearchService, Leaflet) {
+  Leaflet.setup($scope);
+  var enabled = true;
+  var offset = 0;
+  $scope.$on('$destroy', function dismiss() {
+    enabled = false;
+    offset = 0;
+  });
+
+  setTimeout(function(){
+    Leaflet.setUserMarker(function(){
+      $scope.zoom = 15;
+      var offset = 0;
+      var count = 1;
+      var getPoint = function(){
+        SearchService.getNearestBusstops(function(busstops){
+          if(busstops && enabled){
+            for(var i=0; i<busstops.length && i < 10; i++){
+              Leaflet.setBusstopMarker(busstops[i]);
+            }
+            $scope.$apply();
+            offset += count;
+            setTimeout(getPoint, 500);
+          }
+        }, count, offset, {
+          without_vehicles : 1
+        });
+      };
+      getPoint();
+    }, true);
+    
+  }, 2000);
+  
+})
+
+.controller('SearchCtrl', function($scope, DB) {
   $scope.run = true;
-  var data = {
-    'search' : 'asd',
-    'result' : [
-      'asdasd'
-    ]
+  $scope.$on('$destroy', function dismiss() {
+    if(window.cordova){
+      cordova.plugins.Keyboard.close();
+    }
+  });
+
+  $scope.data = {
+    'search' : '',
+    'result' : []
   };
-  $scope.data = data;
-  $scope.onKeyUp = function(value){
+  var busstops = [];
+  DB.getTable('busstops', function(data){
+    busstops = data.busstops;
+  });
+  $scope.onKeyUp = function(){
+    var value = ($scope.data.search).toLowerCase();
+    $scope.data.result = [];
     if(value){
       try{
-        
+        for(var i=0; i<busstops.length; i++){
+          var name = (busstops[i].name+'').toLowerCase();
+          if(name.indexOf(value) !== -1){
+            $scope.data.result.push(busstops[i]);
+          }
+        }
       }catch(e){
       }
     }
-    return [];
   };
 })
 
@@ -163,7 +166,7 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
   }, 1);
 })
 
-.controller('DataCtrl', function($scope, ChooseFile) {
+.controller('DataCtrl', function($scope, $window, ChooseFile, Sync) {
   setTimeout(function(){
     $scope.list = [
       {
@@ -179,8 +182,68 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
 
     $scope.asyncDone = true;
   }, 1);
-})
 
+  $window.addEventListener('change', function(e){
+    if(e.target.files){
+    
+      var file = e.target.files[0];
+
+      console.log('openFile!');
+      var reader = new FileReader();
+      reader.onprogress = function(oEvent) {
+        if (oEvent.lengthComputable) {
+          var percentComplete = oEvent.loaded / oEvent.total;
+          console.log('updateProgress '+percentComplete);
+        }
+      };
+      reader.onload = function(){
+        console.log('reader.onload!');
+        Sync.fromObject = JSON.parse(reader.result);
+        console.log('Parsed!');
+        console.log(Sync.fromObject);
+        Sync.onDone = function(){
+          console.log('Sync.onDone');
+        };
+        
+        Sync.onProgress = function(progress){
+          console.log('Sync.onProgress '+progress);
+        };
+        Sync.onError = function(){
+          console.log('Sync.onError');
+        };
+
+        Sync.run();
+      };
+      reader.readAsText(file);    
+    }
+    
+  });
+  
+})
+.controller('DetailsCtrl', function($scope, $stateParams, DB, Leaflet) {
+  var id = $stateParams.id;
+  if(id){
+    Leaflet.setup($scope);
+    
+    var showMap = function(busstop){
+      Leaflet.setUserMarker(function(){
+        Leaflet.setBusstopMarker(busstop, true);
+        Leaflet.pathUserToBusstop(busstop);
+      });
+    };
+    
+    DB.getTable('busstops', function(data){
+      var busstops = data.busstops;
+      for(var i=0; i<busstops.length; i++){
+        if(busstops[i].id == id){
+          showMap(busstops[i]);
+          break;
+        }
+      }
+    });
+  }
+  
+})
 .controller('DataDetailsCtrl', function($scope, Sync) {
   setTimeout(function(){
     $scope.data = {
@@ -233,12 +296,12 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
           if(entry.isDirectory){
             entry.getParent(function(parentDir){
               $scope.parentDir = parentDir;
+              $scope.popupResult = '';
+              FileManager.getEntries(entry, function(entries){
+                $scope.popupEntries = entries;
+              });              
             }, function(){
               $scope.parentDir = null;
-            });
-            $scope.popupResult = '';
-            FileManager.getEntries(entry, function(entries){
-              $scope.popupEntries = entries;
             });
           }else{
             $scope.popupResult = entry.fullPath;
@@ -250,19 +313,43 @@ angular.module('Seminarium.controllers', ['Seminarium.services'])
       $scope.popupOnChoose = function(){
         console.log('CHOOSEN FILE PATH "'+$scope.popupResult+'"');
         window.resolveLocalFileSystemURL($scope.popupRoot+$scope.popupResult, function(entry){
-          entry.file(function(file) {
-              var reader = new FileReader();
-              reader.onloadend = function (evt) {
-                  console.log("read success");
-                  console.log(evt.target.result);
-              };
-              var content = reader.readAsText(file);
-            console.log(content);
-          }, function (error) {
-              console.log(error.code);
-          });
-        });
+          var syncData = function(content){
+            
+            console.log('reader.onload!');
+            Sync.fromObject = JSON.parse(content);
+            console.log('Parsed!');
+            console.log(Sync.fromObject);
+            Sync.onDone = function(){
+              console.log('Sync.onDone');
+            };
 
+            Sync.onProgress = function(progress){
+              console.log('Sync.onProgress '+progress);
+            };
+            Sync.onError = function(){
+              console.log('Sync.onError');
+            };
+
+            Sync.run();   
+          };
+          
+          entry.file(function(file) { //cordova only
+              var reader = new FileReader();
+              reader.onloadend = function(e) {
+                syncData(this.result);
+              }
+              reader.readAsText(file);
+          });
+          /* //chrome
+          var reader = new FileReader();
+          reader.onloadend = function (evt) {
+            syncData(reader.result);
+          };
+          reader.readAsText(window.cordova.file.externalRootDirectory+entry.fullPath);
+          */
+        }, function (error) {
+            console.log(error.code);
+        });
       };
       $scope.popupOnCancel = function(){
         console.log('CANCELLED');

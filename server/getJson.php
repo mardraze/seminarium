@@ -68,6 +68,16 @@ if(@$_REQUEST['data']){
   
 }
 $response = array('success' => $data === null ? 0 : 1, 'data' => $data);
-echo json_encode($response);
+$str = json_encode($response);
+/*
+$dir = dirname(__FILE__).'/'.implode('_', array_keys($_GET));
+$file = implode('_', $_GET);
+if(!file_exists($dir)){
+	mkdir($dir);
+}
+
+file_put_contents($dir.'/'.$file.'.data', $str);
+*/
+echo $str;
 
 

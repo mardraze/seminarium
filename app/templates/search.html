@@ -10,7 +10,7 @@
   </ion-header-bar>
   <ion-content>
     <div class="list">
-      <li class="item" ng-repeat="item in data.result">{{item}}</li>
+      <a class="item" ng-repeat="item in data.result" href="#/tab/search/{{item.id}}">{{item.name}}</a>
     </div>
   </ion-content>
 </ion-view>

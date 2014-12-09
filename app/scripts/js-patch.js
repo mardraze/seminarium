@@ -5,3 +5,4 @@ Function.prototype.bind = function(ctx) {
     fn.apply(ctx, arguments);
   };
 };
+window.L_DISABLE_3D = true;

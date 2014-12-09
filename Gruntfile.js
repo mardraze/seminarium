@@ -239,6 +239,7 @@ module.exports = function (grunt) {
           dest: 'www',
           src: [
             'images/**/*.{png,jpg,jpeg,gif,webp,svg}',
+            'data/**/*',
             '*.html',
             '../.tmp/concat/*',
             'templates/**/*.html',

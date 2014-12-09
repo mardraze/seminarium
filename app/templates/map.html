@@ -1,7 +1,5 @@
-<!--
-  This template loads for the 'tab.adopt' state (app.js)
--->
 <ion-view title="Mapa">
-  <ion-content has-tabs="true" id="map">
+  <ion-content  data-tap-disabled="true">
+    <leaflet defaults="defaults" paths="paths" center="center" markers="markers" height="600px" width="100%"></leaflet>
   </ion-content>
 </ion-view>

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Seminarium', ['ionic', 'Seminarium.controllers'])
+angular.module('Seminarium', ['ionic', 'Seminarium.controllers', "leaflet-directive"])
 
 
 //    console.log(window.performance.getEntriesByType("resourceError"));
@@ -57,6 +57,15 @@ angular.module('Seminarium', ['ionic', 'Seminarium.controllers'])
         'search-tab': {
           templateUrl: 'templates/search.html',
           controller: 'SearchCtrl'
+        }
+      }
+    })
+    .state('tab.search-details', {
+      url: '/search/:id',
+      views: {
+        'search-tab': {
+          templateUrl: 'templates/map.html',
+          controller: 'DetailsCtrl'
         }
       }
     })
